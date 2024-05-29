@@ -34,6 +34,10 @@ jobs:
 
     # Steps to perform in job
     steps:
+
+      - name: Login to DockerHub
+      run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+
       - name: Checkout code
         uses: actions/checkout@v2.5.0
 
@@ -44,25 +48,22 @@ jobs:
           context: ./backend/simple-api-student
           # Note: tags have to be all lower-case
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp1-backend:latest
-        env:
-          # Utilisez le secret pour le mot de passe DockerHub
-          DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+          push: ${{ github.ref == 'refs/heads/main' }}
+        
 
       - name: Build image and push database
         uses: docker/build-push-action@v3
         with:
           context: ./database
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp1-database:latest
-        env:
-          # Utilisez le secret pour le mot de passe DockerHub
-          DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+          push: ${{ github.ref == 'refs/heads/main' }}
+        
 
       - name: Build image and push httpd
         uses: docker/build-push-action@v3
         with:
           context: ./frontend
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp1-httpd:latest
-        env:
-          # Utilisez le secret pour le mot de passe DockerHub
-          DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+          push: ${{ github.ref == 'refs/heads/main' }}
+       
 
