@@ -41,7 +41,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           # Relative path to the place where source code with Dockerfile is located
-          context: ./simple-api
+          context: ./backend
           # Note: tags have to be all lower-case
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp1-backend:latest
         env:
@@ -60,7 +60,7 @@ jobs:
       - name: Build image and push httpd
         uses: docker/build-push-action@v3
         with:
-          context: ./httpd
+          context: ./frontend
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp1-httpd:latest
         env:
           # Utilisez le secret pour le mot de passe DockerHub
