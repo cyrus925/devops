@@ -1,0 +1,38 @@
+version: '3.7'
+
+services:
+    backend:
+        container_name: backendcontainer
+        build: ./backend/simple-api-student
+        #TODO
+        networks: 
+          - app-network
+        depends_on:
+          - database
+        #TODO
+
+    database:
+        container_name: my_mypostgrescontainer
+        build: ./database
+        
+        networks: 
+          - app-network
+        
+
+    httpd:
+        container_name: frontendcontainer
+        build: ./frontend
+        #TODO
+        ports: 
+        - "8082:80"
+        #TODO
+        networks: 
+          - app-network
+        #TODO
+        depends_on: 
+        - backend
+        - database
+        #TODO
+
+networks:
+    app-network:
