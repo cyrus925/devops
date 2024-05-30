@@ -14,7 +14,8 @@
     image: cyrus925/tp1-httpd
     networks: 
       - name: "app-network"
-    -ports : "80:80"
+    ports:
+      - "80:80"
   vars:
       ansible_python_interpreter: /usr/bin/python3
 
