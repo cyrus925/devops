@@ -12,10 +12,10 @@
   docker_container:
     name: frontendcontainer
     image: cyrus925/tp1-httpd
-    networks: 
-      - name: "app-network"
     ports:
       - "80:80"
+    networks: 
+      - name: "app-network"
   vars:
       ansible_python_interpreter: /usr/bin/python3
 
