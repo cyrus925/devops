@@ -1,0 +1,19 @@
+name: CI devops VM 2024
+
+on:
+  workflow_run:
+    workflows: ["CI devops 2024"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-22.04
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - name: Install Ansible
+        run: sudo apt-get update && sudo apt-get install -y ansible
+
+      - name: Run ansible
+        run: ansible-playbook -i inventories/setup.yml playbook.yml

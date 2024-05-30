@@ -67,20 +67,5 @@ jobs:
           push: ${{ github.ref == 'refs/heads/main' }}
 
 
-connect-to-vm:
-    needs: build-and-push-docker-image
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2.5.0
-
-      - name: Set up SSH
-        uses: webfactory/ssh-agent@v0.5.3
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      - name: Install Ansible
-        run: sudo apt-get update && sudo apt-get install -y ansible
-
-      - name: Run ansible playbook
-        run: ansible-playbook -i inventories/setup.yml playbook.yml
+    
+  
