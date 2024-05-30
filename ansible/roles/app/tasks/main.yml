@@ -13,5 +13,6 @@
     image: cyrus925/tp1-backend
     networks: 
       - name: "app-network"
+    state: started
   vars:
       ansible_python_interpreter: /usr/bin/python3
