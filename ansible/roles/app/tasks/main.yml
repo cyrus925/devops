@@ -1,0 +1,19 @@
+---
+# handlers file for roles/docker
+- name: pull api image
+  docker_image:
+    name: cyrus925/tp1-backend
+    source: pull  
+  vars:
+      ansible_python_interpreter: /usr/bin/python3
+
+- name: Run api container
+  docker_container:
+    name: backendcontainer
+    image: cyrus925/tp1-backend
+    ports:
+      - "80:80"
+    networks: 
+      - name: "app-network"
+  vars:
+      ansible_python_interpreter: /usr/bin/python3

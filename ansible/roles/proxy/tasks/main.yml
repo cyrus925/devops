@@ -1,0 +1,19 @@
+---
+# handlers file for roles/docker
+
+- name: pull db front
+  docker_image:
+    name: cyrus925/tp1-httpd
+    source: pull  
+  vars:
+      ansible_python_interpreter: /usr/bin/python3
+
+- name: Run db container
+  docker_container:
+    name: frontendcontainer
+    image: cyrus925/tp1-httpd
+    networks: 
+      - name: "app-network"
+  vars:
+      ansible_python_interpreter: /usr/bin/python3
+

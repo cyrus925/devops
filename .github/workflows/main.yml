@@ -7,7 +7,7 @@ on:
   pull_request:
 
 jobs:
-  test-backend: 
+  build-and-test-backend: 
     runs-on: ubuntu-22.04
     steps:
      #checkout your github code using actions/checkout@v2.5.0
@@ -29,7 +29,7 @@ jobs:
 # Define job to build and publish Docker image
 
   build-and-push-docker-image:
-    needs: test-backend
+    needs: build-and-test-backend
     # Run only when code is compiling and tests are passing
     runs-on: ubuntu-22.04
 

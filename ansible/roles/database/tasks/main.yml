@@ -1,0 +1,17 @@
+---
+# handlers file for roles/docker
+- name: pull db image
+  docker_image:
+    name: cyrus925/tp1-database
+    source: pull  
+  vars:
+      ansible_python_interpreter: /usr/bin/python3
+
+- name: Run db container
+  docker_container:
+    name: my_mypostgrescontainer
+    image: cyrus925/tp1-database
+    networks: 
+      - name: "app-network"
+  vars:
+      ansible_python_interpreter: /usr/bin/python3
