@@ -7,5 +7,5 @@
     - docker
     - network
     - database
-    - proxy
     - app
+    - proxy
