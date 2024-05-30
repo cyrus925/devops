@@ -68,12 +68,15 @@ jobs:
 
 
     
-  connect to the vm:
+  connect-to-the-vm:
     needs:  build-and-push-docker-image
     # Run only when code is compiling and tests are passing
     runs-on: ubuntu-22.04
 
     # Steps to perform in job
     steps:
+       - name: Install Ansible
+        run: sudo apt-get update && sudo apt-get install -y ansible
+        
       - name: Run ansible
         run: ansible-playbook -i inventories/setup.yml playbook.yml
