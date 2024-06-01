@@ -627,6 +627,28 @@ ServerName cyrus.larger.takima.cloud
 ### Continuous Deployment
 
 
+We add this in the .github/workglows/main.yml
+
+```yml
+run-ansible:
+    needs: build-and-push-docker-image
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2.5.0
+
+      - name: Install Ansible
+        run: sudo apt-get update && sudo apt-get install -y ansible
+
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.id_rsa }}" > ~/.ssh/id_rsa
+        
+      - name: Run Ansible Playbook
+        run: ansible-playbook -i ansible/inventories/setup.yml ansible/playbook.yml
+```
+
 
 
 
