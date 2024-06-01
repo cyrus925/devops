@@ -20,6 +20,12 @@ jobs:
       - name: Install Ansible
         run: sudo apt-get update && sudo apt-get install -y ansible
 
+     
+
       - name: Run ansible
-        run: cd backend/simple-api-student 
+         working-directory: ansible
+        run: ansible-playbook -i inventories/setup.yml ansible/playbook.yml    
+      
+    
+    
     #    run: ansible-playbook -i ansible/inventories/setup.yml ansible/playbook.yml
