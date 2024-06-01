@@ -66,8 +66,8 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp1-httpd:latest
           push: ${{ github.ref == 'refs/heads/main' }}
 
-
-
+  
+    steps:
       - name: Install Ansible
         run: sudo apt-get update && sudo apt-get install -y ansible
 
