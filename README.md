@@ -5,7 +5,7 @@
 
 ### Database
 
-Création de la base de données postgres avec le Dockerfile.
+Creating the postgres database with the Dockerfile.
 
 ```Dockerfile
 FROM postgres:14.1-alpine
@@ -19,28 +19,29 @@ COPY CreateSchema.sql /docker-entrypoint-initdb.d/
 COPY InsertData.sql /docker-entrypoint-initdb.d/
 ```
 
-Construction de l'image Docker.
+Building the Docker image.
 ```sh
 docker build . -t mypostgres 
 ```
 
 
-Création d'un réseau afin de pouvoir lier les conteneurs.
+Creation of a network to link containers.
 ```sh
 docker network create app-network
 ```
 
-Création du conteneur mypostgres
+
+Creating the mypostgres container
 ```sh
 docker run -p5432:5432 -d --name my_mypostgrescontainer --network app-network -e POSTGRES_USER=usr -e POSTGRES_PASSWORD=pwd -e POSTGRES_DB=db -v D:/EPF/4A/DevOps/TP1/database:/var/lib/mypostgresql/data mypostgres 
 ```
 
-Création du conteneur adminer pour voir la BDD sur un front-end
+Creating the adminer container to view the database on a front-end
 ```sh
 docker run -d --name my_adminercontainer --network app-network -p 8090:8080 adminer
 ```
 
-Création de deux fichiers SQL
+Creating two SQL files
 
 CreateSchema.sql
 ```sql
@@ -75,7 +76,7 @@ INSERT INTO students (department_id, first_name, last_name) VALUES (3, 'Aude', '
 
 ### Backend
 
-Nous pouvons voir le dockerFile du backend
+We can see the backend DockerFile
 
 ```Dockerfile
 # Build
@@ -97,60 +98,51 @@ ENTRYPOINT java -jar myapp.jar
 
 Question : Why do we need a multistage build? And explain each step of this dockerfile.
 
-Ils vous permettent d'utiliser plusieurs instructions FROM dans votre fichier Docker. Chaque instruction FROM peut utiliser une base différente, et chacune d'entre elles commence une nouvelle étape de la construction. C'est utile pour afin d'optimiser les images Docker.
+They allow you to use multiple FROM statements in your Docker file. Each FROM statement can use a different base, and each starts a new step in the build. This is useful for optimizing Docker images.
 
-Build Stage :
+#### Build Stage :
 ```Dockerfile
 # Build
 FROM maven:3.8.6-amazoncorretto-17 AS myapp-build
 ```
 This line is pulling a Maven image with Amazon Corretto 17 JDK installed. This image is used as the base image for the build stage. The AS myapp-build part is naming this stage so it can be referred to later.
+
 ```Dockerfile
 ENV MYAPP_HOME /opt/myapp
 WORKDIR $MYAPP_HOME
 ```
 These lines are setting an environment variable MYAPP_HOME and changing the working directory to the directory specified by MYAPP_HOME.
+
 ```Dockerfile
 COPY pom.xml .
 COPY src ./src
 ```
 These lines are copying the pom.xml file and the src directory from the local machine to the Docker image.
-COPY src ./src
+
 ```Dockerfile
 RUN mvn package -DskipTests
 ```
 This line is running mvn package -DskipTests to build the application without running tests.
 
-Deployment Stage :
+#### Deployment Stage :
+
 ```Dockerfile
 # Run
 FROM amazoncorretto:17
 ```
 This line is starting a new build stage with Amazon Corretto 17 JDK as the base image.
+
 ```Dockerfile
 ENV MYAPP_HOME /opt/myapp
 WORKDIR $MYAPP_HOME
 ```
-GitHub Copilot
-Multistage builds are useful to anyone who has struggled to optimize Dockerfiles while keeping them easy to read and maintain. They allow you to use multiple FROM statements in your Dockerfile. Each FROM instruction can use a different base, and each of them begins a new stage of the build. You can selectively copy artifacts from one stage to another, leaving behind everything you don’t want in the final image.
-
-Here's what each step in this Dockerfile does:
-
-This line is pulling a Maven image with Amazon Corretto 17 JDK installed. This image is used as the base image for the build stage. The AS myapp-build part is naming this stage so it can be referred to later.
-
 These lines are setting an environment variable MYAPP_HOME and changing the working directory to the directory specified by MYAPP_HOME.
 
-These lines are copying the pom.xml file and the src directory from the local machine to the Docker image.
-
-This line is running mvn package -DskipTests to build the application without running tests.
-
-This line is starting a new build stage with Amazon Corretto 17 JDK as the base image.
-
-These lines are setting an environment variable MYAPP_HOME and changing the working directory to the directory specified by MYAPP_HOME.
 ```Dockerfile
 COPY --from=myapp-build $MYAPP_HOME/target/*.jar $MYAPP_HOME/myapp.jar
 ```
 This line is copying the built JAR file from the myapp-build stage to the current stage.
+
 ```Dockerfile
 ENTRYPOINT java -jar myapp.jar
 ```
@@ -158,8 +150,9 @@ ENTRYPOINT java -jar myapp.jar
 
 ### HTTP Server
 
-Nous allons configurer le serveur http comme un simple serveur proxy inverse devant notre application. Nous allons changer les éléments du fichier conf.
-Nous allons tout d'abord copier le fichier conf du serveur HTTP présent de base dans les fichiers Docker puis, nous allons ajouter ces élements :
+We're going to configure the http server as a simple reverse proxy server in front of our application. We're going to change the elements in the conf file.
+First, we're going to copy the HTTP server conf file from the Docker files, and then we're going to add these elements:
+
 ```conf
 <VirtualHost *:80>
 ProxyPreserveHost On
@@ -170,14 +163,13 @@ LoadModule proxy_module modules/mod_proxy.so
 LoadModule proxy_http_module modules/mod_proxy_http.so
 ```
 
-Nous devons créer un Dockerfile pour personnaliser l'image officiel de httpd:2.4 afin de modifier le conf et de placer la page index.html comme page d'accueil.
-
+We need to create a Dockerfile to customize the official httpd:2.4 image in order to modify the conf and place the index.html page as the home page.
 
 ### Link application
 
-Plutot que de lancer chaque fois son Dockerfile pour chaque partie de l'application, nous allons effectuer un fichier docker-compose.yml.
+Rather than launching a Dockerfile for each part of the application, we'll create a docker-compose.yml file.
 
-Le fichier sera de cette forme :
+The file will look like this:
 
 ```yml
 version: '3.7'
@@ -227,20 +219,19 @@ The most important commands for docker-compose are :
 ```sh
 docker-compose up -d
 ```
-C'est utile pour start the application.
-
+It's useful for starting the application.
 ```sh
 docker-compose down
 ```
-C'est utile pour stop and remove the application
+It's useful for stopping and removing the application.
 
 ```sh
 docker-compose build
 ```
-C'est utile pour re-build les images.
+It's useful for re-building the images.
 
-Nous allons expliquer le Dockerfile. Il y a 3 services, qui sont définit comme 3 conteneurs pour effectuer l'applciation.
-Le premier service est :
+Let's explain the Dockerfile. There are 3 services, which are defined as 3 containers to perform the application.
+The first service is :
 ```Dockerfile
  backend:
         container_name: backendcontainer
@@ -253,10 +244,9 @@ Le premier service est :
         #TODO
 ```
 
-Nous allons définir le nom du container, ou se trouve le Dockerfile avec "build". Nous allons préciser le networks afin que les conteneurs soient bien liés. Et la dépendance avec la database pour respecter l'architecture 3-tier de l'application.
+We'll define the container name, where the Dockerfile is located, with “build”. We'll specify the networks so that the containers are properly linked. And the dependency on the database to respect the 3-tier architecture of the application.
 
-Le deuxième service est la database :
-
+The second service is the database which is configured as the backend:
 ```Dockerfile
 database:
         container_name: my_mypostgrescontainer
@@ -265,7 +255,6 @@ database:
         networks: 
           - app-network
 ```
-Nous l'avons configuré de la même facon que le backend.
 
 ```Dockerfile
     httpd:
@@ -284,32 +273,33 @@ Nous l'avons configuré de la même facon que le backend.
         #TODO
 ```
 
-Nous avons précisé les ports 80:80 et la dépendance avec le backend et la database comme l'architecture de l'application.
+We have specified ports 80:80 and dependency on the backend and database as the application architecture.
+
+We've defined the network with the lines below.
 
 ```Dockerfile
 networks:
     app-network:
 ```
-Nous avons défini le network avec les lignes ci-dessus.
 
 ### Publish
 
-Nous allons publier nos conteneurs sur docker hub.
+We're going to publish our containers on docker hub.
 
-Nous nous connectons à notre compte avec 
+We connect to our account with 
 
 ```sh
 docker login 
 ```
 
-Dans un premier temps, nous tagons nos conteneurs :
+First, we tag our containers:
 ```sh
 docker tag tp1-backend cyrus925/tp1-backend:1.0
 docker tag tp1-httpd cyrus925/tp1-httpd:1.0
 docker tag tp1-database cyrus925/tp1-database:1.0
 ```
 
-Puis nous allons les pousser dans docker hub:
+Then we'll push them into docker hub:
 ```sh
 docker push cyrus925/tp1-backend:1.0
 docker push cyrus925/tp1-httpd:1.0
@@ -319,16 +309,17 @@ docker push cyrus925/tp1-database:1.0
 
 ## TP 2 : Discover Github Action
 
-Nous allons build and test notre backend.
+We're going to test our backend.
 
 ```sh
 mvn clean verify --files /path/to/pom.xml
 ```
 
 Question : What are testcontainers?
+
 Testcontainers is a Java library that provides lightweight, disposable instances of databases, message brokers, and other services running in Docker containers. It is designed to support automated testing by allowing you to create and manage Docker containers directly from your test code. This approach ensures that your tests have consistent and isolated environments, which can be crucial for reliable and reproducible tests.
 
-Nous allons créer .github/workflows directory et nous allons ajouter notre fichier main.yml afin de tester le backend.
+We're going to create a .github/workflows directory and add our main.yml file in order to test the backend.
 
 ```yml
 name: CI devops 2024
@@ -359,7 +350,7 @@ jobs:
       - name: Build and test with Maven
         run: cd backend/simple-api-student && mvn clean verify
 ```
-Nous allons maintenant duild the docker images inside the GitHub Actions pipeline dans le main.yml.
+We're now going to duild the docker images inside the GitHub Actions pipeline in main.yml.
 
 ```Dockerfile
   build-and-push-docker-image:
@@ -403,7 +394,7 @@ Nous allons maintenant duild the docker images inside the GitHub Actions pipelin
 
 ### Sonar
 
-Nous allons set up your pipeline to use SonarCloud analysis while testing. Pour se faire, nous allons modifier le fichier main.yml.
+We're going to set up your pipeline to use SonarCloud analysis while testing. To do this, we're going to modify the main.yml file.
 
 ```yml
  - name: Build and test with Maven
@@ -414,7 +405,7 @@ Nous allons set up your pipeline to use SonarCloud analysis while testing. Pour 
 
 ## TP 3 : Discover Ansible
 
-Afin de nous connecter à la VM, nous allons créer ce fichier yml dans ce folder /ansible/inventories/setup.yml
+To connect to the VM, we're going to create this yml file in this folder /ansible/inventories/setup.yml
 
 ```yml
 all:
@@ -426,7 +417,8 @@ all:
      hosts: cyrus.larger.takima.cloud 
 ```
 
-Nous testons pour voir s'il arrive à bien se connecter:
+We're testing to see if it connects properly:
+
 ```sh
 ansible all -i inventories/setup.yml -m ping
 ```
@@ -465,7 +457,7 @@ ansible-playbook -i inventories/setup.yml playbook.yml
 
 #### Advanced Playbook
 
-Nous allons diviser les playbooks pour chaque tache grâce au playbook.yml.
+We're going to divide up the playbooks for each task using playbook.yml.
 
 ```yml
 - hosts: all
@@ -481,7 +473,7 @@ Nous allons diviser les playbooks pour chaque tache grâce au playbook.yml.
     - proxy
 ```
 
-Les taks sont definits telles que :
+The tasks are defined as follows:
 
 /proxy/tasks/main.yml
 ```yml
@@ -568,6 +560,8 @@ Les taks sont definits telles que :
       ansible_python_interpreter: /usr/bin/python3
 ```
 
+
+
 /database/tasks/main.yml
 ```yml
 ---
@@ -588,6 +582,8 @@ Les taks sont definits telles que :
   vars:
       ansible_python_interpreter: /usr/bin/python3
 ```
+
+
 
 /app/tasks/main.yml
 
@@ -613,14 +609,16 @@ Les taks sont definits telles que :
       ansible_python_interpreter: /usr/bin/python3
 ```
 
-Nous allons déployer notre serveur avec ansible avec cette commande :
+
+
+We're going to deploy our server using ansible with this command :
 ```sh
 ansible-playbook -i ansible/inventories/setup.yml ansible/playbook.yml
 ```
 
-Malheureusement, il y a une erreur dans le proxy.
+Unfortunately, there is an error in the proxy.
 
-Nous devons modifier le fichier httpd.conf et ajouter cette ligne dans <VirtualHost *:80>.
+We need to modify the httpd.conf file and add this line in <VirtualHost *:80>.
 
 ```conf
 ServerName cyrus.larger.takima.cloud
