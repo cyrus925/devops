@@ -78,6 +78,7 @@ jobs:
 
       - name: Set up SSH key
         run: |
+          mkdir -p ~/.ssh
           echo "${{ secrets.id_rsa }}" > ~/.ssh/id_rsa
         
       - name: Run Ansible Playbook
