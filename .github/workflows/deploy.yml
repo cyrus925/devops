@@ -23,7 +23,6 @@ jobs:
      
 
       - name: Run ansible
-         working-directory: ansible
         run: ansible-playbook -i inventories/setup.yml ansible/playbook.yml    
       
     
